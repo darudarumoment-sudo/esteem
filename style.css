@@ -62,3 +62,11 @@ button {
   color: #4caf93;
   font-weight: bold;
 }
+
+input[type="checkbox"] {
+  display: inline-block;
+  appearance: auto;
+  width: 18px;
+  height: 18px;
+}
+
