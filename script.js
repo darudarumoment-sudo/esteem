@@ -1,129 +1,84 @@
-// ========================
-// 🌱 Esteem
-// 今日固定ミッション＋達成メッセージ
-// ========================
-
-// 行動
-const actions = [
-  "深呼吸を3回してみよう",
-  "肩の力を少し抜いてみよう",
-  "背筋を軽く伸ばしてみよう",
-  "スマホから少し目を離してみよう",
-  "目を閉じて10秒休んでみよう",
-  "ゆっくり息を吐いてみよう",
-  "一度手を止めてみよう",
-  "今の姿勢を少し整えてみよう",
-  "今ここに意識を戻してみよう",
-  "今日ここまで頑張った自分を思い出してみよう"
+const missions = [
+  "誰かにありがとうを言う",
+  "5分だけ片付けをする",
+  "背筋を伸ばす",
+  "水を1杯飲む",
+  "スマホを1回置く",
+  "深呼吸を3回する",
+  "自分を褒める",
+  "外の空を見る",
+  "笑顔を作る",
+  "今日頑張ったことを思い出す"
 ];
 
-// つなぎ
-const connectors = [
-  "よかったら",
-  "できそうだったら",
-  "無理のない範囲で",
-  "気が向いたら",
-  "そのままで大丈夫だから"
-];
-
-// 意味づけ
-const meanings = [
-  "自分をいたわってあげよう",
-  "今の自分で十分だよ",
-  "ここまでの頑張りを認めよう",
-  "一歩ずつで大丈夫",
-  "無理しなくていいよ"
-];
-
-// ------------------------
-// 今日の日付
-// ------------------------
-function getToday() {
-  const d = new Date();
-  return (
-    d.getFullYear() + "-" +
-    String(d.getMonth() + 1).padStart(2, "0") + "-" +
-    String(d.getDate()).padStart(2, "0")
-  );
-}
-
-// ------------------------
-// ミッション生成
-// ------------------------
-function generateMission() {
-  const a = actions[Math.floor(Math.random() * actions.length)];
-  const c = connectors[Math.floor(Math.random() * connectors.length)];
-  const m = meanings[Math.floor(Math.random() * meanings.length)];
-
-  return `${c}、${a}。${m}`;
-}
-
-// ------------------------
-// 達成チェック
-// ------------------------
-function checkComplete(checks) {
-  const message = document.getElementById("message");
-
-  if (checks.every(c => c === true)) {
-    message.textContent = "🎉 おめでとう！今日もよく頑張ったね 🌱";
-  } else {
-    message.textContent = "";
-  }
-}
-
-// ------------------------
-// 表示
-// ------------------------
 function showMissions() {
-  const today = getToday();
+  const today = new Date().toDateString();
+  const savedDate = localStorage.getItem("missionDate");
 
-  const savedDate = localStorage.getItem("esteem-date");
-  const savedMissions = JSON.parse(localStorage.getItem("esteem-missions") || "[]");
-  const savedChecks = JSON.parse(localStorage.getItem("esteem-checks") || "[]");
-
-  let missions = [];
-  let checks = [];
-
-  if (savedDate === today && savedMissions.length === 3) {
-    missions = savedMissions;
-    checks = savedChecks.length === 3 ? savedChecks : [false, false, false];
-  } else {
-    missions = [];
-    checks = [false, false, false];
-
-    for (let i = 0; i < 3; i++) {
-      missions.push(generateMission());
-    }
-
-    localStorage.setItem("esteem-date", today);
-    localStorage.setItem("esteem-missions", JSON.stringify(missions));
-    localStorage.setItem("esteem-checks", JSON.stringify(checks));
+  // 今日すでに生成してたら再表示
+  if (savedDate === today) {
+    document.getElementById("mission-list").innerHTML =
+      localStorage.getItem("missionHTML");
+    return;
   }
 
+  // 新しく生成
   const list = document.getElementById("mission-list");
   list.innerHTML = "";
 
-  missions.forEach((mission, index) => {
+  const selected = missions.sort(() => 0.5 - Math.random()).slice(0, 3);
+
+  selected.forEach((text) => {
     const li = document.createElement("li");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.checked = checks[index];
-
-    checkbox.addEventListener("change", () => {
-      checks[index] = checkbox.checked;
-      localStorage.setItem("esteem-checks", JSON.stringify(checks));
-      checkComplete(checks); // ←ここ重要！
-    });
-
-    const span = document.createElement("span");
-    span.textContent = " " + mission;
+    checkbox.onchange = checkComplete;
 
     li.appendChild(checkbox);
-    li.appendChild(span);
+    li.append(" " + text);
     list.appendChild(li);
   });
 
-  // ページ再表示時も判定
-  checkComplete(checks);
+  localStorage.setItem("missionDate", today);
+  localStorage.setItem("missionHTML", list.innerHTML);
+}
+
+function checkComplete() {
+  const checkboxes = document.querySelectorAll("input[type='checkbox']");
+  const allChecked = [...checkboxes].every(cb => cb.checked);
+
+  if (!allChecked) return;
+
+  const message = document.getElementById("message");
+  const streakEl = document.getElementById("streak");
+
+  // === 連続日数処理 ===
+  const today = new Date();
+  const todayStr = today.toDateString();
+
+  const lastDate = localStorage.getItem("lastClearDate");
+  let streak = Number(localStorage.getItem("streak")) || 0;
+
+  if (lastDate) {
+    const diff =
+      (today - new Date(lastDate)) / (1000 * 60 * 60 * 24);
+
+    if (diff >= 1 && diff < 2) {
+      streak += 1;
+    } else if (diff < 1) {
+      // 今日すでに達成済み
+    } else {
+      streak = 1;
+    }
+  } else {
+    streak = 1;
+  }
+
+  localStorage.setItem("lastClearDate", todayStr);
+  localStorage.setItem("streak", streak);
+
+  // === 表示 ===
+  message.textContent = "🎉 おめでとう！今日のミッション達成！";
+  streakEl.textContent = `🔥 ${streak}日連続達成！`;
 }
