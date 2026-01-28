@@ -1,55 +1,95 @@
-const missionList = [
-  "コップ一杯の水を飲む",
-  "深呼吸を3回する",
-  "1分だけ目を閉じる",
-  "机の上を1つ片付ける",
-  "自分に「よくやってる」と言う",
-  "スマホを置いて30秒休む",
-  "背伸びをする"
+// ========================
+// 🌱 Esteem - script.js
+// ========================
+
+// 行動
+const actions = [
+  "深呼吸を3回してみよう",
+  "肩の力を少し抜いてみよう",
+  "背筋を軽く伸ばしてみよう",
+  "スマホから少し目を離してみよう",
+  "目を閉じて10秒休んでみよう",
+  "今いる場所の空気を感じてみよう",
+  "ゆっくり息を吐いてみよう",
+  "体の力が入っているところに気づいてみよう",
+  "今の姿勢を少し整えてみよう",
+  "一度手を止めてみよう",
+  "今日ここまで頑張った自分を思い出してみよう"
 ];
 
-function generateMissions() {
-  const ul = document.getElementById("missions");
-  const message = document.getElementById("message");
+// つなぎ
+const connectors = [
+  "よかったら",
+  "できそうだったら",
+  "無理のない範囲で",
+  "ほんの少しだけ",
+  "気が向いたら",
+  "そのままで大丈夫だから"
+];
 
-  ul.innerHTML = "";
-  message.textContent = "";
+// 意味づけ
+const meanings = [
+  "自分をいたわってあげよう",
+  "今の自分を大切にしよう",
+  "ここまでの頑張りを認めよう",
+  "今の自分で十分だよ",
+  "一歩ずつで大丈夫"
+];
 
-  const shuffled = missionList.sort(() => 0.5 - Math.random());
-  const selected = shuffled.slice(0, 3);
+// ========================
+// 今日の日付取得
+// ========================
 
-  selected.forEach(mission => {
-    const li = document.createElement("li");
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-
-    checkbox.addEventListener("change", checkAllDone);
-
-    li.appendChild(checkbox);
-    li.appendChild(document.createTextNode(" " + mission));
-
-    ul.appendChild(li);
-  });
+function getToday() {
+  const today = new Date();
+  return today.getFullYear() + "-" +
+    String(today.getMonth() + 1).padStart(2, "0") + "-" +
+    String(today.getDate()).padStart(2, "0");
 }
 
-function checkAllDone() {
-  const checkboxes = document.querySelectorAll("input[type='checkbox']");
-  const message = document.getElementById("message");
+// ========================
+// ミッション生成
+// ========================
 
-  const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+function generateMission() {
+  const a = actions[Math.floor(Math.random() * actions.length)];
+  const c = connectors[Math.floor(Math.random() * connectors.length)];
+  const m = meanings[Math.floor(Math.random() * meanings.length)];
 
-  if (allChecked) {
-    message.textContent = "🌱 今日もよくやったね。小さな一歩、ちゃんと積み重なってるよ。";
+  return `${c}、${a}。${m}`;
+}
+
+// ========================
+// 今日のミッション表示
+// ========================
+
+function showMissions() {
+  const today = getToday();
+  const savedDate = localStorage.getItem("esteem-date");
+  const savedMissions = localStorage.getItem("esteem-missions");
+
+  let missions = [];
+
+  // 今日すでに生成されている場合
+  if (savedDate === today && savedMissions) {
+    missions = JSON.parse(savedMissions);
   } else {
-    message.textContent = "";
+    // 新しく生成
+    for (let i = 0; i < 3; i++) {
+      missions.push(generateMission());
+    }
+
+    localStorage.setItem("esteem-date", today);
+    localStorage.setItem("esteem-missions", JSON.stringify(missions));
   }
-}
 
-const today = new Date().toDateString();
-const savedDay = localStorage.getItem("day");
+  // 表示
+  const list = document.getElementById("mission-list");
+  list.innerHTML = "";
 
-if (savedDay !== today) {
-  localStorage.setItem("day", today);
-  generateMissions();
+  missions.forEach(m => {
+    const li = document.createElement("li");
+    li.textContent = m;
+    list.appendChild(li);
+  });
 }
