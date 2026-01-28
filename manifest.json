@@ -1,7 +1,7 @@
 {
   "name": "エスティム",
   "short_name": "エスティム",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#8BC34A",
@@ -18,3 +18,4 @@
     }
   ]
 }
+
