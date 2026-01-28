@@ -1,6 +1,6 @@
 // ========================
 // 🌱 Esteem
-// 今日1回だけ生成 ＋ チェック保存
+// 今日固定ミッション＋達成メッセージ
 // ========================
 
 // 行動
@@ -59,7 +59,20 @@ function generateMission() {
 }
 
 // ------------------------
-// 表示（チェック付き）
+// 達成チェック
+// ------------------------
+function checkComplete(checks) {
+  const message = document.getElementById("message");
+
+  if (checks.every(c => c === true)) {
+    message.textContent = "🎉 おめでとう！今日もよく頑張ったね 🌱";
+  } else {
+    message.textContent = "";
+  }
+}
+
+// ------------------------
+// 表示
 // ------------------------
 function showMissions() {
   const today = getToday();
@@ -100,6 +113,7 @@ function showMissions() {
     checkbox.addEventListener("change", () => {
       checks[index] = checkbox.checked;
       localStorage.setItem("esteem-checks", JSON.stringify(checks));
+      checkComplete(checks); // ←ここ重要！
     });
 
     const span = document.createElement("span");
@@ -109,4 +123,7 @@ function showMissions() {
     li.appendChild(span);
     list.appendChild(li);
   });
+
+  // ページ再表示時も判定
+  checkComplete(checks);
 }
