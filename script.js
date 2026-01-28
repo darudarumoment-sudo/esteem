@@ -1,6 +1,6 @@
 // ========================
 // 🌱 Esteem
-// 今日1回だけミッション生成
+// 今日1回だけ生成 ＋ チェック保存
 // ========================
 
 // 行動
@@ -48,7 +48,7 @@ function getToday() {
 }
 
 // ------------------------
-// ミッション1つ作る
+// ミッション生成
 // ------------------------
 function generateMission() {
   const a = actions[Math.floor(Math.random() * actions.length)];
@@ -59,36 +59,54 @@ function generateMission() {
 }
 
 // ------------------------
-// 今日のミッション表示
+// 表示（チェック付き）
 // ------------------------
 function showMissions() {
   const today = getToday();
 
   const savedDate = localStorage.getItem("esteem-date");
-  const savedMissions = localStorage.getItem("esteem-missions");
+  const savedMissions = JSON.parse(localStorage.getItem("esteem-missions") || "[]");
+  const savedChecks = JSON.parse(localStorage.getItem("esteem-checks") || "[]");
 
   let missions = [];
+  let checks = [];
 
-  // 今日すでに作られている場合
-  if (savedDate === today && savedMissions) {
-    missions = JSON.parse(savedMissions);
+  if (savedDate === today && savedMissions.length === 3) {
+    missions = savedMissions;
+    checks = savedChecks.length === 3 ? savedChecks : [false, false, false];
   } else {
-    // 新しく作る
+    missions = [];
+    checks = [false, false, false];
+
     for (let i = 0; i < 3; i++) {
       missions.push(generateMission());
     }
 
     localStorage.setItem("esteem-date", today);
     localStorage.setItem("esteem-missions", JSON.stringify(missions));
+    localStorage.setItem("esteem-checks", JSON.stringify(checks));
   }
 
-  // 表示
   const list = document.getElementById("mission-list");
   list.innerHTML = "";
 
-  missions.forEach(mission => {
+  missions.forEach((mission, index) => {
     const li = document.createElement("li");
-    li.textContent = mission;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = checks[index];
+
+    checkbox.addEventListener("change", () => {
+      checks[index] = checkbox.checked;
+      localStorage.setItem("esteem-checks", JSON.stringify(checks));
+    });
+
+    const span = document.createElement("span");
+    span.textContent = " " + mission;
+
+    li.appendChild(checkbox);
+    li.appendChild(span);
     list.appendChild(li);
   });
 }
