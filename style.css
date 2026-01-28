@@ -93,5 +93,32 @@ input[type="checkbox"] {
   }
 }
 
+/* ------------------------
+   ミッションリストの見やすさ改善
+------------------------- */
+#mission-list {
+  list-style: none;       /* デフォルトの丸印を消す */
+  padding: 0;
+  margin-top: 20px;
+  text-align: left;       /* チェックボックスと文章を左寄せ */
+}
+
+#mission-list li {
+  background-color: #fff; /* 白背景でカード風 */
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;    /* 角丸で柔らかい印象 */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* 薄い影で浮き上がり感 */
+  display: flex;
+  align-items: center;    /* チェックボックスと文章を縦中央揃え */
+}
+
+#mission-list input[type="checkbox"] {
+  margin-right: 12px;    /* チェックボックスと文章の間隔 */
+  width: 20px;            /* タップしやすいサイズ */
+  height: 20px;
+}
+
+
 
 
